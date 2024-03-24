@@ -2,18 +2,23 @@ package org.example;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
+        List<String> paths = new ArrayList<>();
         while (true) {
             System.out.println("File Management Options:");
             System.out.println("1. Create File\n2. Delete File\n3. Protect File\n4. Unlock File Permanently\n5. Hide File\n6. Unhide File\n7. List All Protected Files\n8. List All Hidden Files");
-            Integer choice = scanner.nextInt();
+            int choice = scanner.nextInt();
+            scanner.nextLine();
             switch (choice) {
                 case 1:
-                    String path = "C:\\Users\\IndhuGane\\File_Handling\\Files\\file1.text";
+                    System.out.println("Enter file path to create");
+                    String path = scanner.nextLine();
                     File file = new File(path);
                     try {
                         boolean flag = file.createNewFile();
@@ -28,7 +33,8 @@ public class Main {
                     break;
 
                 case 2:
-                    String filePath = "C:\\Users\\IndhuGane\\File_Handling\\Files\\file.text";
+                    System.out.println("Enter the file path to delete");
+                    String filePath = scanner.nextLine();
                     File fileDelete = new File(filePath);
                     try {
                         if (fileDelete.exists()) {
@@ -47,7 +53,7 @@ public class Main {
 
                     break;
                 case 5:
-                    String folderPath = "C:\\Users\\IndhuGane\\File_Handling\\Files";
+                    String folderPath = scanner.nextLine();
 
                     // Rename the folder to make it less visible
                     File folder = new File(folderPath);
@@ -55,6 +61,7 @@ public class Main {
 
                     if (folder.exists()) {
                         if (folder.renameTo(hiddenFolder)) {
+                            paths.add(hiddenFolder.getAbsolutePath());
                             System.out.println("Folder hidden successfully.");
                         } else {
                             System.out.println("Failed to hide the folder.");
@@ -64,23 +71,33 @@ public class Main {
                     }
                     break;
                 case 6:
-                    String pathUnhide = "C:\\Users\\IndhuGane\\File_Handling\\Files";
+                    String pathUnhide = scanner.nextLine();
                     File hiddenFolderNew = new File(pathUnhide);
-                    if(hiddenFolderNew.exists()){
-                        String originalFolderpath = hiddenFolderNew.getParent() +File.separator +hiddenFolderNew.getName().substring(8);
-                        File originalFolder = new File(originalFolderpath);
+                    if (hiddenFolderNew.exists()) {       // folder name length should be greater than 8
+                        String originalFolderPath = hiddenFolderNew.getParent() + File.separator + hiddenFolderNew.getName().substring(8);
+                        File originalFolder = new File(originalFolderPath);
 
-                        if(hiddenFolderNew.renameTo(originalFolder)){
-                            System.out.println("Folder unhided successfully");
+                        if (hiddenFolderNew.renameTo(originalFolder)) {
+                            System.out.println("Folder un-hided successfully");
+                        } else {
+                            System.out.println("Failed to un-hide the folder");
                         }
-                        else {
-                            System.out.println("Failed to unhide the folder");
-                        }
+                   }
+                    else {
+                        System.out.println("Hidden folder doesn't exist");
                     }
-                    else{
-                        System.out.println("Hiddem folder doesn't exist");
+                    break;
+                case 8:
+                    System.out.println("List of hidden files :");
+                    if(paths.size() >0){
+                    for (String demo : paths) {
+                        System.out.println(demo);
                     }
-
+                }
+                    else {
+                        System.out.println("There is no hidden files");
+                    }
+                    break;
             }
         }
     }
