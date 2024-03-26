@@ -2,12 +2,62 @@ package org.example;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+//import jcifs.smb.NtlmPasswordAuthentication;
+//import jcifs.smb.SmbFile;
+import java.io.*;
+import javax.crypto.*;
+import javax.crypto.spec.SecretKeySpec;
+import javax.swing.*;
 
 public class Main {
-    public static void main(String[] args) {
+    private static Map<String, String> userCredentials = new HashMap<>();
+    private static boolean flag = false;
+
+    public static void hideFolder(String folderPath) throws IOException {
+        String command = "cmd.exe /c attrib +H \"" + folderPath + "\"";
+        Runtime.getRuntime().exec(command);
+        System.out.println("Folder hidden successfully.");
+    }
+
+    public static void unhideFolder(String folderPath) throws IOException {
+        String command = "cmd.exe /c attrib -H \"" + folderPath + "\"";
+        Runtime.getRuntime().exec(command);
+        System.out.println("Folder unhidden successfully.");
+    }
+    private static void signUp(Scanner scanner){
+        System.out.println("Sign Up");
+        System.out.println("Enter your username:");
+        String userName= scanner.nextLine();
+        System.out.println("Enter your password:");
+        String password = scanner.nextLine();
+        userCredentials.put(userName,password);
+        System.out.println("SignUp successful");
+        flag = true;
+
+    }
+    private static void login(Scanner scanner){
+        System.out.println("Login");
+        System.out.println("Enter your username:");
+        String userName= scanner.nextLine();
+        System.out.println("Enter your password:");
+        String password = scanner.nextLine();
+        if(userCredentials.containsKey(userName) && userCredentials.get(userName).equals(password)){
+            System.out.println("Login Succesfull");
+            flag = true;
+        }
+        else{
+            System.out.println("Invalid UserName or Password , Please try again");
+        }
+    }
+    public static void main(String[] args) throws Exception {
         Scanner scanner = new Scanner(System.in);
         List<String> paths = new ArrayList<>();
         while (true) {
@@ -16,6 +66,13 @@ public class Main {
             int choice = scanner.nextInt();
             scanner.nextLine();
             switch (choice) {
+                case 100:
+                    signUp(scanner);
+                    break;
+                case 200:
+                    login(scanner);
+                    break;
+                    // trying to check for account if not cant perfomr any further cases like 1 2 3 4
                 case 1:
                     System.out.println("Enter file path to create");
                     String path = scanner.nextLine();
@@ -53,40 +110,110 @@ public class Main {
 
                     break;
                 case 5:
-                    String folderPath = scanner.nextLine();
+                    String folderToHide_Path = scanner.nextLine(); // Specify the path to your folder here
 
-                    // Rename the folder to make it less visible
-                    File folder = new File(folderPath);
-                    File hiddenFolder = new File(folder.getParent(), "." + folder.getName());
+                    try {
+                        // Hide the folder
+                        hideFolder(folderToHide_Path);
+                        paths.add(folderToHide_Path);
+                        // Uncomment the below line to unhide the folder
+                        // unhideFolder(folderPath);
 
-                    if (folder.exists()) {
-                        if (folder.renameTo(hiddenFolder)) {
-                            paths.add(hiddenFolder.getAbsolutePath());
-                            System.out.println("Folder hidden successfully.");
-                        } else {
-                            System.out.println("Failed to hide the folder.");
-                        }
-                    } else {
-                        System.out.println("Folder does not exist.");
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                     break;
                 case 6:
-                    String pathUnhide = scanner.nextLine();
-                    File hiddenFolderNew = new File(pathUnhide);
-                    if (hiddenFolderNew.exists()) {       // folder name length should be greater than 8
-                        String originalFolderPath = hiddenFolderNew.getParent() + File.separator + hiddenFolderNew.getName().substring(8);
-                        File originalFolder = new File(originalFolderPath);
+                    String folderToUnHide_Path = scanner.nextLine(); // Specify the path to your folder here
 
-                        if (hiddenFolderNew.renameTo(originalFolder)) {
-                            System.out.println("Folder un-hided successfully");
-                        } else {
-                            System.out.println("Failed to un-hide the folder");
-                        }
-                   }
-                    else {
-                        System.out.println("Hidden folder doesn't exist");
+                    try {
+                        // Uncomment the below line to unhide the folder
+                         unhideFolder(folderToUnHide_Path);
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                     break;
+//                case 3:
+//                    String url = scanner.nextLine();
+//                    String username = "USER";
+//                    String password = "PASSWORD";
+//
+//                    try {
+//                        // Convert SMB URL to Path
+//                        Path smbPath = Paths.get(url);
+//
+//                        // Set up authentication if needed
+//                        if (username != null && password != null) {
+//                            smbPath = smbPath.resolve(username + ":" + password + "@");
+//                        }
+//
+//                        // Use DirectoryStream to list files
+//                        try (DirectoryStream<Path> stream = Files.newDirectoryStream(smbPath)) {
+//                            for (Path entry : stream) {
+//                                System.out.println(entry.getFileName());
+//                            }
+//                        }
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                    break;
+//                case 4:
+//                    String folderToUnProtect_url = "smb://yourhost/yourpath/";
+//
+//                    try {
+//                        URL smbUrl = new URL(folderToUnProtect_url);
+//                        URLConnection connection = smbUrl.openConnection();
+//                        InputStream inputStream = connection.getInputStream();
+//                        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+//
+//                        String line;
+//                        while ((line = reader.readLine()) != null) {
+//                            System.out.println(line);
+//                        }
+//
+//                        reader.close();
+//                        inputStream.close();
+//                    } catch (MalformedURLException e) {
+//                        e.printStackTrace();
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
+//                case 13:
+//                    String folderPath = scanner.nextLine();
+//
+//                    // Rename the folder to make it less visible
+//                    File folder = new File(folderPath);
+//                    File hiddenFolder = new File(folder.getParent(), "." + folder.getName());
+//
+//                    if (folder.exists()) {
+//                        if (folder.renameTo(hiddenFolder)) {
+//                            paths.add(hiddenFolder.getAbsolutePath());
+//                            System.out.println("Folder hidden successfully.");
+//                        } else {
+//                            System.out.println("Failed to hide the folder.");
+//                        }
+//                    } else {
+//                        System.out.println("Folder does not exist.");
+//                    }
+//                    break;
+//                case 14:
+//                    String pathUnhide = scanner.nextLine();
+//                    File hiddenFolderNew = new File(pathUnhide);
+//                    if (hiddenFolderNew.exists()) {       // folder name length should be greater than 8
+//                        String originalFolderPath = hiddenFolderNew.getParent() + File.separator + hiddenFolderNew.getName().substring(8);
+//                        File originalFolder = new File(originalFolderPath);
+//
+//                        if (hiddenFolderNew.renameTo(originalFolder)) {
+//                            System.out.println("Folder un-hided successfully");
+//                        } else {
+//                            System.out.println("Failed to un-hide the folder");
+//                        }
+//                   }
+//                    else {
+//                        System.out.println("Hidden folder doesn't exist");
+//                    }
+//                    break;
                 case 8:
                     System.out.println("List of hidden files :");
                     if(paths.size() >0){
@@ -97,6 +224,9 @@ public class Main {
                     else {
                         System.out.println("There is no hidden files");
                     }
+                    break;
+                default:
+                    System.out.println("Please Enter the valid choice");
                     break;
             }
         }
