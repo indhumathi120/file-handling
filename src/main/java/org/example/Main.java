@@ -171,11 +171,12 @@ public class Main {
                  case 6:
                     String folderToUnHide_Path = "C:\\Users\\IndhuGane\\File_Handling\\"; // Specify the path to your folder here
                      System.out.println("Enter the file name to Unhide");
-                     String fileNametoUnhide = scanner.nextLine();
-                     String filepathtoUnhide = folderToUnHide_Path + fileNametoUnhide;
+                     String fileNametoUnHide = scanner.nextLine();
+                     String filepathtoUnHide = folderToUnHide_Path + fileNametoUnHide;
+
                     try {
                         // Uncomment the below line to unhide the folder
-                         unhideFolder(folderToUnHide_Path);
+                         unhideFolder(filepathtoUnHide);
 
                     } catch (IOException e) {
                         e.printStackTrace();
