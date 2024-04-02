@@ -13,6 +13,7 @@ import java.util.*;
 //import jcifs.smb.NtlmPasswordAuthentication;
 //import jcifs.smb.SmbFile;
 import java.io.*;
+import java.util.stream.Stream;
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import javax.swing.*;
@@ -62,7 +63,7 @@ public class Main {
         List<File> paths = new ArrayList<>();
         while (true) {
             System.out.println("File Management Options:");
-            System.out.println("1. Create File\n2. Delete File\n3. Protect File\n4. Unlock File Permanently\n5. Hide File\n6. Unhide File\n7. List All Protected Files\n8. List All Hidden Files");
+            System.out.println("1. Create File\n2. Delete File\n3. Hide File\n4. Unhide File\n5. List All Hidden Files\n6.List All the Existing Files");
             int choice = scanner.nextInt();
             scanner.nextLine();
             switch (choice) {
@@ -72,12 +73,12 @@ public class Main {
                 case 200:
                     login(scanner);
                     break;
-                    // trying to check for account if not cant perfomr any further cases like 1 2 3 4
+                // trying to check for account if not cant perfomr any further cases like 1 2 3 4
                 case 1:
                     String hardCodePath = "C:\\Users\\IndhuGane\\File_Handling\\";
                     System.out.println("Enter file name to create");
                     String path = scanner.nextLine();
-                    String result = hardCodePath+path;
+                    String result = hardCodePath + path;
                     File file = new File(result);
                     try {
                         boolean flag = file.createNewFile();
@@ -92,11 +93,11 @@ public class Main {
                     break;
 
                 case 2:
-                    String hardCodePathToDel= "C:\\Users\\IndhuGane\\File_Handling\\";
+                    String hardCodePathToDel = "C:\\Users\\IndhuGane\\File_Handling\\";
                     //String hardCodePathToDel = "C:\\Users\\IndhuGane\\File_Handling\\";
                     System.out.println("Enter the file name to delete");
                     String fileName = scanner.nextLine();
-                    if(fileName.isEmpty()){
+                    if (fileName.isEmpty()) {
                         System.out.println("Invalid File name.");
                         return;
                     }
@@ -118,14 +119,20 @@ public class Main {
                     }
 
                     break;
-                case 5:
+                case 3:
                     String folderToHide_Path = "C:\\Users\\IndhuGane\\File_Handling\\";
                     File folder = new File(folderToHide_Path);
                     File[] files = folder.listFiles();
+                    List<File> onlyUnHiddenFiles = new ArrayList<>();
                     if (files != null) {
-                        System.out.println("Files in the folder:");
+                        int temp = 0;
+                        System.out.println("Files in the folder to hide:");
                         for (int i = 0; i < files.length; i++) {
-                            System.out.println((i + 1) + ". " + files[i].getName());
+                            if (!files[i].isHidden()) {
+                                onlyUnHiddenFiles.add(files[i]);
+                                System.out.println((temp + 1) + ") " + files[i].getName());
+                                temp++;
+                            }
                         }
                     }
 
@@ -135,14 +142,14 @@ public class Main {
                     File fileToHide = null;
                     try {
                         int fileNumber = Integer.parseInt(userInput);
-                        if (fileNumber > 0 && fileNumber <= files.length) {
-                            fileToHide = files[fileNumber - 1];
+                        if (fileNumber > 0 && fileNumber <= onlyUnHiddenFiles.size()) {
+                            fileToHide = onlyUnHiddenFiles.get(fileNumber - 1);
                         } else {
                             System.out.println("Invalid file number.");
                         }
                     } catch (NumberFormatException e) {
                         // If input is not a number, try to match with file names
-                        for (File file_specific : files) {
+                        for (File file_specific : onlyUnHiddenFiles) {
                             if (file_specific.getName().equals(userInput)) {
                                 fileToHide = file_specific;
                                 break;
@@ -168,15 +175,15 @@ public class Main {
                     break;
 
 
-                 case 6:
+                case 4:
                     String folderToUnHide_Path = "C:\\Users\\IndhuGane\\File_Handling\\"; // Specify the path to your folder here
-                     System.out.println("Enter the file name to Unhide");
-                     String fileNametoUnHide = scanner.nextLine();
-                     String filepathtoUnHide = folderToUnHide_Path + fileNametoUnHide;
+                    System.out.println("Enter the file name to Unhide");
+                    String fileNametoUnHide = scanner.nextLine();
+                    String filepathtoUnHide = folderToUnHide_Path + fileNametoUnHide;
 
                     try {
                         // Uncomment the below line to unhide the folder
-                         unhideFolder(filepathtoUnHide);
+                        unhideFolder(filepathtoUnHide);
 
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -262,15 +269,30 @@ public class Main {
 //                        System.out.println("Hidden folder doesn't exist");
 //                    }
 //                    break;
-                case 8:
-                    System.out.println("List of hidden files :");
-                    if(paths.size() >0){
-                    for (File demo : paths) {
-                        System.out.println(demo);
+                case 5:
+                    File dir = new File("C:\\Users\\IndhuGane\\File_Handling\\");
+                    File[] fileDirectory = dir.listFiles(File::isHidden);
+                    List<File> fileStream = Arrays.stream(fileDirectory).toList();
+                    for (int index = 0; index < fileStream.size(); index++) {
+                        System.out.println((index + 1) + ") " + fileStream.get(index).getName());
                     }
-                }
-                    else {
-                        System.out.println("There is no hidden files");
+                    break;
+                case 6:
+//                    File displayAllFiles = new File("C:\\Users\\IndhuGane\\File_Handling\\");
+//                    if (displayAllFiles.isHidden())
+//                        System.out.println(
+//                                "The specified file is hidden");
+//                    else
+//                        System.out.println("The specified file is not hidden");
+//                    break;
+                    File directory = new File("C:\\Users\\IndhuGane\\File_Handling\\");
+                    File[] fileList = directory.listFiles();
+                    int temp=1;
+                    if (fileList != null) {
+                        for (File fileNew : fileList) {
+                            System.out.println(temp+") "+fileNew.toString());
+                            temp++;
+                        }
                     }
                     break;
                 default:
