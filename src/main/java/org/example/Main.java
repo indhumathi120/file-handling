@@ -28,7 +28,7 @@ public class Main {
         System.out.println("Folder hidden successfully.");
     }
 
-    public static void unhideFolder(String folderPath) throws IOException {
+    public static void unhideFolder(File folderPath) throws IOException {
         String command = "cmd.exe /c attrib -H \"" + folderPath + "\"";
         Runtime.getRuntime().exec(command);
         System.out.println("Folder unhidden successfully.");
@@ -177,16 +177,51 @@ public class Main {
 
                 case 4:
                     String folderToUnHide_Path = "C:\\Users\\IndhuGane\\File_Handling\\"; // Specify the path to your folder here
+                    File folderNew = new File(folderToUnHide_Path);
+                    File[] filesnew = folderNew.listFiles();
+                    if(filesnew!=null){
+                        System.out.println("Files in folder");
+                        int temp=1;
+                        for(int index=0;index<filesnew.length;index++){
+                            if(filesnew[index].isHidden()){
+                                System.out.println(temp + ") " + filesnew[index].getName());
+                                temp ++;
+                            }
+                        }
+                    }
                     System.out.println("Enter the file name to Unhide");
                     String fileNametoUnHide = scanner.nextLine();
-                    String filepathtoUnHide = folderToUnHide_Path + fileNametoUnHide;
+//                    String filepathtoUnHide = folderToUnHide_Path + fileNametoUnHide;
 
-                    try {
-                        // Uncomment the below line to unhide the folder
-                        unhideFolder(filepathtoUnHide);
-
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    File fileToUhide = null;
+                    try{
+                        int fileNumbetToUnhide = Integer.parseInt(fileNametoUnHide);
+                        if(fileNumbetToUnhide >0 && fileNumbetToUnhide <= filesnew.length){
+                            fileToUhide = filesnew[fileNumbetToUnhide-1];
+                        }
+                        else{
+                            System.out.println("Invalid file number");
+                        }
+                    }
+                    catch (NumberFormatException e){
+                        for(File fileSpecific : filesnew){
+                            if(fileSpecific.getName().equals(fileNametoUnHide)){
+                                fileToUhide = fileSpecific;
+                                break;
+                            }
+                        }
+                        if(fileToUhide == null){
+                            System.out.println("File not found");
+                        }
+                    }
+                    if(fileToUhide != null){
+                        try{
+                            unhideFolder(fileToUhide);
+                            System.out.println("File \"" +fileToUhide.getName() +"\" has been Unhidden.");
+                        }
+                        catch (IOException e){
+                            e.printStackTrace();
+                        }
                     }
                     break;
 //                case 3:
@@ -288,11 +323,19 @@ public class Main {
                     File directory = new File("C:\\Users\\IndhuGane\\File_Handling\\");
                     File[] fileList = directory.listFiles();
                     int temp=1;
-                    if (fileList != null) {
-                        for (File fileNew : fileList) {
-                            System.out.println(temp+") "+fileNew.toString());
-                            temp++;
+                    try {
+                        if (fileList != null) {
+                            for (File fileNew : fileList) {
+                                System.out.println(temp + ") " + fileNew.getPath().toString());
+                                temp++;
+                            }
                         }
+                        else{
+                            System.out.println("No files found in the " + directory);
+                        }
+                    }
+                    catch (Exception e) {
+                        System.out.println("Error occurred while listing files :"+e.getMessage());
                     }
                     break;
                 default:
